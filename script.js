@@ -146,3 +146,7 @@ function checkChildren(node) {
 
 
 checkChildren(document.body);
+
+
+// NOTE: need to add lookup/conversion for all the tiny vowel combinations:
+// Fa Fi Wi We Ti, etc.
