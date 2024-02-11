@@ -63,7 +63,6 @@ function determineRomaji(hiraString) {
       return romajiForVowelPair(hiraString);
     } 
     if (hiraString.includes("っ")) {
-      console.log(hiraString);
       return romajiForTsuPair(hiraString);
     }
   }
