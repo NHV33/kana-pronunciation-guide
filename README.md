@@ -1,6 +1,5 @@
 # Kana Pronunciation Guide
-All the hiragana and katakana on this page have been automatically annotated with latin character transliterations (i.e., "romaji"), which may be useful for people who are just starting to learn Japanese.
-
+Automatically annotates all the hiragana and katakana on a page with latin character transliterations (i.e., "romaji"), which may be useful for people who are just starting to learn Japanese.
 ## Live Demo:
 [nhv33.github.io/kana-pronunciation-guide](https://nhv33.github.io/kana-pronunciation-guide)
 ## How to Use:
