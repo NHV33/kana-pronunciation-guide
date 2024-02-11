@@ -6,17 +6,18 @@ katakana = ['ァ','ア','ィ','イ','ゥ','ウ','ェ','エ','ォ','オ','カ','�
 const tiny_hira = ['ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', 'っ', 'ゃ', 'ゅ', 'ょ', 'ゎ'];
 const tiny_kata = ['ァ', 'ィ', 'ゥ', 'ェ', 'ォ', 'ッ', 'ャ', 'ュ', 'ョ', 'ヮ'];
 const all_tiny_kana = tiny_hira.concat(tiny_kata);
-// っッ
+
+const tiny_hira_vowels = ['ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ'];
+const tiny_kata_vowels = ['ァ', 'ィ', 'ゥ', 'ェ', 'ォ'];
+const all_tiny_kana_vowels = tiny_hira_vowels.concat(tiny_kata_vowels);
+
 // ぁ-ゖァ-ヺ all kana glyphs
-// ぁ-ぢつ-ゔァ-ヂツ-ヴ <== no little tsu
-// const tsuPattern = /[っッ]{1}[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}/;
-// const doubleKanaPattern = /[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}[ぁぃぅぇぉゃゅょァィゥェォャュョ]{1}/;
-// const singleKanaPattern = /^([ぁ-ぢつ-ゔァ-ヂツ-ヴ]){1}|([ぁ-ぢつ-ゔァ-ヂツ-ヴ]){1}$|[^>]{1}([ぁ-ぢつ-ゔァ-ヂツ-ヴ]){1}/;
-// const singleKanaPattern = /([^っッ]?)(\[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1})/;
-const singleKanaPattern = /[っッ]{1}[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}|[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}[ぁぃぅぇぉゃゅょァィゥェォャュョ]{1}|[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}/;
+// ぁ-ぢつ-ゔァ-ヂツ-ヴ <== all kana glyphs (excluding tiny tsu)
+const unifiedKanaPattern = /[っッ]{1}[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}|[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}[ぁぃぅぇぉゃゅょァィゥェォャュョ]{1}|[ぁ-ぢつ-ゔァ-ヂツ-ヴ]{1}/;
 
 const getMatchingItem = (item, list1, list2) => { return list1.includes(item) ? list2[list1.indexOf(item)] : item; };
 
+// Methods like substring used for maximum 
 function replaceAtIndex(str, index, length, newSubstring) {
   if (index < 0 || index >= str.length) { return str; }
   const stringWithoutChar = str.substring(0, index) + str.substring(index + length);
@@ -24,51 +25,16 @@ function replaceAtIndex(str, index, length, newSubstring) {
   return stringWithoutChar.substring(0, index) + newSubstring + stringWithoutChar.substring(index);
 }
 
-function getMatchIndexes(str, regex) {
-  const indexes = [];
-  let match;
-  const regexWithGlobal = new RegExp(regex, 'g'); // Ensure the regex has the global flag set
-
-  while ((match = regexWithGlobal.exec(str)) !== null) {
-      indexes.push(match.index); // Store the index of the match
-  }
-
-  return indexes;
-}
-
-// function wrapAllMatchingChars(text, regex_pattern, start_tag, end_tag) {
-//   const matchIndexes = getMatchIndexes(text, regex_pattern)
-//   for (let i = matchIndexes.length - 1; i >=0 ; i -= 1) {
-//     const matchIndex = matchIndexes[i];
-//     const matchChar = text[matchIndex];
-//     const replacement = start_tag + matchChar + end_tag;
-//     text = replaceAtIndex(text, matchIndex, replacement);
-//   }
-
-//   return text;
-// }
-
-// function addTagsToNodeText(node, regex_pattern, start_tag, end_tag) {
-//   if (node.nodeType !== Node.ELEMENT_NODE || node.childNodes.length < 1) { return; }
-//   const nodeText = node.childNodes[0].nodeValue;
-//   const taggedString = wrapAllMatchingChars(nodeText, regex_pattern, start_tag, end_tag);
-//   node.innerHTML = node.innerHTML.replace(nodeText, taggedString);
-// }
-
 function getMatches(str, regex) {
+  // Ensure the regex has the global flag set
+  const regexWithGlobal = new RegExp(regex, 'g');
   const matches = [];
   let match;
-  const regexWithGlobal = new RegExp(regex, 'g'); // Ensure the regex has the global flag set
-
   while ((match = regexWithGlobal.exec(str)) !== null) {
     matches.push(match);
   }
 
   return matches;
-}
-
-function nextCharTiny(text, matchIndex) {
-  return matchIndex < text.length - 2 && all_tiny_kana.includes(text[matchIndex + 1])
 }
 
 function kata2hira(text) {
@@ -79,6 +45,32 @@ function kata2hira(text) {
   return hira.join("")
 }
 
+function romajiForTsuPair(hiraString) {
+  const nonTsu = getMatchingItem(hiraString[1], hiraganaCombinations, hebonTransliteration);
+  return nonTsu[0] + nonTsu;
+}
+
+function romajiForVowelPair(hiraString) {
+  let consonant = getMatchingItem(hiraString[0], hiraganaCombinations, hebonTransliteration)[0]
+  if (consonant === "u") { consonant = "w" }
+  const tiny_romaji_vowels = ['a', 'i', 'u', 'e', 'o']
+  return consonant + getMatchingItem(hiraString[1], tiny_hira_vowels, tiny_romaji_vowels)
+}
+
+function determineRomaji(hiraString) {
+  if (hiraString.length === 2) {
+    if (tiny_hira_vowels.includes(hiraString[1])) {
+      return romajiForVowelPair(hiraString);
+    } 
+    if (hiraString.includes("っ")) {
+      console.log(hiraString);
+      return romajiForTsuPair(hiraString);
+    }
+  }
+
+  return getMatchingItem(hiraString, hiraganaCombinations, hebonTransliteration);
+}
+
 function wrapAllMatchingChars(text, regex_pattern) {
   const matches = getMatches(text, regex_pattern)
 
@@ -86,31 +78,17 @@ function wrapAllMatchingChars(text, regex_pattern) {
     const matchObj = matches[i]
     const matchObjLastIndex = matchObj.length - 1;
     const matchString = matchObj[matchObjLastIndex];
-    const fullMatch = matchObj[0]
-    // const offSet = fullMatch.indexOf(matchString);
+    /** Some variation of these lines might be needed 
+     * for matches with capture groups: **/
+              // const fullMatch = matchObj[0]
+              // const offSet = fullMatch.indexOf(matchString);
+              // const matchIndex = matchObj.index + offset;
     const matchIndex = matchObj.index;
     const matchLength = matchString.length;
 
-  console.log(matchIndex, matchObjLastIndex, matchString, matchLength)
-    // const matchString = text.substring(matchIndex, matchIndex + matchLength);
+    const hiraString = kata2hira(matchString);
 
-    console.log(matches[i])
-
-    // let hiraString = matchString;
-    // if(/[ァ-ヺ]/.test(matchString)) {
-    //   hiraString = kata2hira(matchString);
-    // }
-
-    let hiraString = kata2hira(matchString);
-
-    let romaji = getMatchingItem(hiraString, hiraganaCombinations, hebonTransliteration);
-
-    if(hiraString.length > 1 && hiraString.includes("っ")) {
-      console.log("test")
-      const nonTsu = getMatchingItem(hiraString[1], hiraganaCombinations, hebonTransliteration);
-      romaji = nonTsu[0] + nonTsu;
-
-    }
+    const romaji = determineRomaji(hiraString);
 
     const replacement = `<ruby>${matchString}<rt>${romaji}</rt></ruby>`;
 
@@ -121,13 +99,23 @@ function wrapAllMatchingChars(text, regex_pattern) {
 }
 
 function addTagsToNodeText(node, regex_patterns) {
-  if (node.nodeType !== Node.ELEMENT_NODE || node.childNodes.length < 1) { return; }
-  const nodeText = node.childNodes[0].nodeValue;
-  let taggedString = nodeText;
+  if (node.nodeType !== Node.TEXT_NODE || node.parentNode.nodeName.toLowerCase() === 'ruby') {
+    return; 
+  }
+  
+  let nodeText = node.nodeValue;
   regex_patterns.forEach(pattern => {
-    taggedString = wrapAllMatchingChars(taggedString, pattern);
+    nodeText = wrapAllMatchingChars(nodeText, pattern);
   });
-  node.innerHTML = node.innerHTML.replace(nodeText, taggedString);
+  
+  const tempSpan = document.createElement('span');
+  tempSpan.innerHTML = nodeText;
+  
+  while (tempSpan.firstChild) {
+    node.parentNode.insertBefore(tempSpan.firstChild, node);
+  }
+  
+  node.parentNode.removeChild(node);
 }
 
 function checkChildren(node) {
@@ -139,14 +127,8 @@ function checkChildren(node) {
     checkChildren(childNode);
   }
 
-  // addTagsToNodeText(node, tsuPattern);
-  // addTagsToNodeText(node, [tsuPattern, doubleKanaPattern, singleKanaPattern]);
-  addTagsToNodeText(node, [singleKanaPattern]);
+  addTagsToNodeText(node, [unifiedKanaPattern]);
 }
 
-
+// This starts a recursive traversal of all DOM nodes.
 checkChildren(document.body);
-
-
-// NOTE: need to add lookup/conversion for all the tiny vowel combinations:
-// Fa Fi Wi We Ti, etc.
