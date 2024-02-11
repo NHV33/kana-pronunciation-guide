@@ -6,7 +6,7 @@ Automatically annotates all the hiragana and katakana on a page with latin chara
 - Download a webpage with your browser (using ctrl+s, etc.).
 - Open the html file in a text editor.
 - Save the script.js file to the same folder as the .htm or .html file.
-- Paste <script src="script.js" async defer></script> inside the <body></body> section at the very bottom.
+- Paste <script src="script.js" async defer></script> at the very bottom of the inside of the body tag.
 
 When pasted, it should look something like this:
 ```html
